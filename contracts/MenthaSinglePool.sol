@@ -19,48 +19,23 @@ contract MenthaSinglePool is MenthaPoolBase {
     event TicketsBought(address indexed buyer, uint numberOfTickets, uint amount);
     event TicketsRedeemed(address indexed buyer, uint numberOfTickets, uint amount);
 
-    // /**
-    //  * @notice Contract constructor method.
-    //  * @param _symbol - LP token symbol without prefix.
-    //  * @param _collateral - Collateral ERC20 token address.
-    //  * @param _ticketPrice - Single ticket price.
-    //  */
-    // constructor(
-    //     string memory _symbol,
-    //     address _collateral,
-    //     uint _ticketPrice
-    //     ) MenthaPoolBase (
-    //         _symbol
-    //         ) {
-        
-    //     collateral = IERC20(_collateral);
-    //     ticketPrice = _ticketPrice;
-    // }
-
-    /**
-     * @notice Contract constructor method.
-     */
-    // constructor() MenthaPoolBase () {}
-
-
     /**
      * @notice Contract initializer method.
+     * @param _symbol - Collateral ERC20 token symbol.
      * @param _collateral - Collateral ERC20 token address.
      * @param _ticketPrice - Single ticket price.
      */
-    // function initialize() public initializer
-    function init(
+    function initialize(
+        string memory _symbol,
         address _collateral,
         uint _ticketPrice
-        ) external {
+        ) public initializer {
         
-        collateral = IERC20(_collateral);
-        // string memory symbol = collateral.symbol();
-        // console.log(symbol);
-        ticketPrice = _ticketPrice;
+        // Initializing base contract
+        MenthaPoolBase.initialize(_symbol);
 
-        // _init(symbol);
-        _init('KKK');
+        collateral = IERC20(_collateral);
+        ticketPrice = _ticketPrice;
     }
 
     /**
@@ -96,7 +71,6 @@ contract MenthaSinglePool is MenthaPoolBase {
      * @param _numberOfTickets - Number of the tickets to be redeemed.
      */
     function redeemTickets(uint _numberOfTickets) public nonReentrant {
-        // require(status != LotteryPoolStatus.STAKING, 'Cannot redeem tickets during staking process');
         require(tickets[msg.sender] > 0 && tickets[msg.sender] >= _numberOfTickets, 'You do not have enough tickets');
 
         _redeemTickets(_numberOfTickets, msg.sender);

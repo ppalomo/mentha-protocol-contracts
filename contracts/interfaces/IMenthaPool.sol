@@ -2,35 +2,20 @@
 pragma solidity ^0.8.0;
 
 /** 
- * @title Mentha pool interface
+ * @title Mentha pool interface.
  */
 interface IMenthaPool {
 
-    function init(address _collateral, uint _ticketPrice) external;
-        
-    // enum LotteryPoolStatus { OPEN, STAKING, CLOSED, CANCELLED }
-
-    // function init(
-    //     address _parent,
-    //     uint _lotteryId,
-    //     address _creator, 
-    //     address _nftAddress, 
-    //     uint _nftIndex, 
-    //     uint _ticketPrice,
-    //     uint _minProfit,
-    //     uint _created,
-    //     uint _lotteryPoolType) external;
-
-    // function buyTickets(uint _numberOfTickets) external payable;
-
-    // function redeemProfit() external;
-
-    // function declareWinner() external;
-
-    // function cancelLottery() external;
-
-    // function ticketsOf(address _addr) external view returns (uint);
-
-    // function getBalance() external view returns (uint);
+    /**
+     * @notice Contract initializer method.
+     * @param _symbol - Collateral ERC20 token symbol.
+     * @param _collateral - Collateral ERC20 token address.
+     * @param _ticketPrice - Single ticket price.
+     */
+    function initialize(
+        string memory _symbol,
+        address _collateral,
+        uint _ticketPrice
+        ) external;
     
 }

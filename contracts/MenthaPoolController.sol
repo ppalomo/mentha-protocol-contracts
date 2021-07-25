@@ -1,12 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-// import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./interfaces/IMenthaPool.sol";
-// import "./interfaces/IStakingAdapter.sol";
 import "./utils/CloneFactory.sol";
 import "hardhat/console.sol";
 
@@ -17,6 +15,9 @@ contract MenthaPoolController is CloneFactory, OwnableUpgradeable, ReentrancyGua
     mapping(uint => address) private masterPools;
     mapping(uint => bytes32) private poolTypes;
     IMenthaPool[] public pools;
+
+    // Events
+    event PoolCreated(uint poolId, address indexed creator, address poolAddress, uint ticketPrice, uint poolType, string symbol);
 
     // Public methods
 
@@ -34,11 +35,16 @@ contract MenthaPoolController is CloneFactory, OwnableUpgradeable, ReentrancyGua
 
     /**
      * @notice Creates a new pool.
-     * @param _poolType - ???.
-     * @param _collateral - ????.
-     * @param _ticketPrice - Ticket price.
+     * @param _poolType - Pool type to be created.
+     * @param _symbol - Collateral ERC20 token symbol.
+     * @param _collateral - Collateral ERC20 token address.
+     * @param _ticketPrice - Single ticket price.
      */
-    function createPool(uint _poolType, address _collateral, uint _ticketPrice) external onlyOwner {
+    function createPool(
+        uint _poolType, 
+        string memory _symbol, 
+        address _collateral, 
+        uint _ticketPrice) external onlyOwner {
         
         // for (uint i=0; i<_tokens.length; i++) {
         //     console.log(_tokens[i]);
@@ -53,11 +59,11 @@ contract MenthaPoolController is CloneFactory, OwnableUpgradeable, ReentrancyGua
 
         // Cloning and deploying a new pool
         IMenthaPool pool = IMenthaPool(createClone(masterPoolAddress));
-        pool.init(_collateral, _ticketPrice);
+        pool.initialize(_symbol, _collateral, _ticketPrice);
         pools.push(pool);
 
         // Emiting event
-        // emit PoolCreated(lotteries.length - 1, msg.sender, address(lottery), _nftAddress, _nftIndex, _ticketPrice, created, _lotteryPoolType, _minProfit, stakingAdapter, stakingAdapterName);
+        emit PoolCreated(pools.length - 1, msg.sender, address(pool), _ticketPrice, _poolType, _symbol);
     }
 
     /**
@@ -74,6 +80,13 @@ contract MenthaPoolController is CloneFactory, OwnableUpgradeable, ReentrancyGua
 
         poolTypes[_poolTypeId] = _poolTypeName;
         masterPools[_poolTypeId] = _masterPoolAddress;
+    }
+
+    /**
+     * Method used to return number of created pools.
+     */
+    function numberOfPools() external view returns(uint) {
+        return pools.length;
     }
 
 }

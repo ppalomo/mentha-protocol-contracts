@@ -50,54 +50,68 @@ describe("Mentha Single Pool", function() {
     });
 
     it("Should create a new single pool", async function () {
-        await controller.createPool(
-            0,
-            collateral.address,
-            ethers.utils.parseEther('1')
-        );
+        // Act
+        await controller.createPool(0, await collateral.symbol(), collateral.address, ethers.utils.parseEther('1'));
+        let pools = [await _getPool(0)];
 
-        expect(1).to.equal(1);
+        // Assert
+        expect(pools[0].address).to.properAddress;
+        expect(await controller.numberOfPools()).to.equal(1);
+        expect(await pools[0].owner()).to.equal(controller.address);
     });
 
-    // it("Should buy tickets", async function () {
-    //     // Arrange
-    //     await collateral.connect(addr1).approve(pool.address, ethers.utils.parseEther('100'));
-    //     await collateral.connect(addr2).approve(pool.address, ethers.utils.parseEther('100'));
+    it("Should buy tickets", async function () {
+        // Arrange
+        await controller.createPool(0, await collateral.symbol(), collateral.address, ethers.utils.parseEther('1'));
+        let pools = [await _getPool(0)];
+        await collateral.connect(addr1).approve(pools[0].address, ethers.utils.parseEther('100'));
+        await collateral.connect(addr2).approve(pools[0].address, ethers.utils.parseEther('100'));
         
-    //     // Act
-    //     await pool.connect(addr1).buyTickets(10);
-    //     await pool.connect(addr2).buyTickets(5);
+        // Act
+        await pools[0].connect(addr1).buyTickets(10);
+        await pools[0].connect(addr2).buyTickets(5);
         
-    //     // Assert
-    //     expect(await collateral.balanceOf(addr1.address)).to.be.equal(ethers.utils.parseEther('90'));
-    //     expect(await collateral.balanceOf(addr2.address)).to.be.equal(ethers.utils.parseEther('95'));
-    //     expect(await collateral.balanceOf(pool.address)).to.be.equal(ethers.utils.parseEther('15'));
-    //     expect(await pool.totalCollateral()).to.equal(ethers.utils.parseEther('15'));
-    //     expect(await pool.ticketsOf(addr1.address)).to.equal(10);
-    //     expect(await pool.ticketsOf(addr2.address)).to.equal(5);
-    //     expect(await pool.numberOfTickets()).to.equal(15);
-    // });
+        // Assert
+        expect(await collateral.balanceOf(addr1.address)).to.be.equal(ethers.utils.parseEther('90'));
+        expect(await collateral.balanceOf(addr2.address)).to.be.equal(ethers.utils.parseEther('95'));
+        expect(await collateral.balanceOf(pools[0].address)).to.be.equal(ethers.utils.parseEther('15'));
+        expect(await pools[0].totalCollateral()).to.equal(ethers.utils.parseEther('15'));
+        expect(await pools[0].ticketsOf(addr1.address)).to.equal(10);
+        expect(await pools[0].ticketsOf(addr2.address)).to.equal(5);
+        expect(await pools[0].numberOfTickets()).to.equal(15);
+    });
 
-    // it("Should redeem tickets", async function () {
-    //     // Arrange
-    //     await collateral.connect(addr1).approve(pool.address, ethers.utils.parseEther('100'));
-    //     await collateral.connect(addr2).approve(pool.address, ethers.utils.parseEther('100'));
-    //     await pool.connect(addr1).buyTickets(10);
-    //     await pool.connect(addr2).buyTickets(5);
+    it("Should redeem tickets", async function () {
+        // Arrange
+        await controller.createPool(0, await collateral.symbol(), collateral.address, ethers.utils.parseEther('1'));
+        let pools = [await _getPool(0)];
+        await collateral.connect(addr1).approve(pools[0].address, ethers.utils.parseEther('100'));
+        await collateral.connect(addr2).approve(pools[0].address, ethers.utils.parseEther('100'));
+        await pools[0].connect(addr1).buyTickets(10);
+        await pools[0].connect(addr2).buyTickets(5);
 
-    //     // Act
-    //     await pool.connect(addr1).redeemTickets(5);
-    //     await pool.connect(addr2).redeemTickets(3);
+        // Act
+        await pools[0].connect(addr1).redeemTickets(5);
+        await pools[0].connect(addr2).redeemTickets(3);
         
-    //     // Assert
-    //     expect(await collateral.balanceOf(addr1.address)).to.be.equal(ethers.utils.parseEther('95'));
-    //     expect(await collateral.balanceOf(addr2.address)).to.be.equal(ethers.utils.parseEther('98'));
-    //     expect(await collateral.balanceOf(pool.address)).to.be.equal(ethers.utils.parseEther('7'));
-    //     expect(await pool.totalCollateral()).to.equal(ethers.utils.parseEther('7'));
-    //     expect(await pool.ticketsOf(addr1.address)).to.equal(5);
-    //     expect(await pool.ticketsOf(addr2.address)).to.equal(2);
-    //     expect(await pool.numberOfTickets()).to.equal(7);
-    // });
+        // Assert
+        expect(await collateral.balanceOf(addr1.address)).to.be.equal(ethers.utils.parseEther('95'));
+        expect(await collateral.balanceOf(addr2.address)).to.be.equal(ethers.utils.parseEther('98'));
+        expect(await collateral.balanceOf(pools[0].address)).to.be.equal(ethers.utils.parseEther('7'));
+        expect(await pools[0].totalCollateral()).to.equal(ethers.utils.parseEther('7'));
+        expect(await pools[0].ticketsOf(addr1.address)).to.equal(5);
+        expect(await pools[0].ticketsOf(addr2.address)).to.equal(2);
+        expect(await pools[0].numberOfTickets()).to.equal(7);
+    });
 
+    // Private methods
+
+    async function _getPool(index) {
+        let pool = await controller.pools(index);        
+        MenthaSinglePool = await ethers.getContractFactory("MenthaSinglePool");
+        let contract = MenthaSinglePool.attach(pool);
+
+        return contract;
+    }
 
 });
