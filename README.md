@@ -1,39 +1,9 @@
-This is a [HardHat](https://hardhat.org/) project.
+# Mentha Protocol
 
-# Getting Started
+This repository contains the smart contracts source code for the Mentha Protocol. The protocol was developed using the following technologies:
 
-First run this command to install dependencies:
+- Solidity and Hardhat (Smart Contracts)
 
-```
-$ npm install
-```
+## What is Mentha Protocol?
 
-Then you can compile contracts or execute the tests:
-
-```
-$ npx hardhat compile
-$ npx hardhat test
-```
-
-# Deploying the contracts
-
-Execute deploy script:
-
-```
-$ npx hardhat run scripts/deploy.js --network [network]
-```
-
-Verifying the contracts:
-
-```
-$ npx hardhat clean && npx hardhat verify --network [network] [contract_address]
-
-# In case the contract has parameters:
-$ npx hardhat verify --network [network] [contract_address] param1 param2
-```
-
-# Flatten Contracts
-
-```
-$ npx hardhat flatten contracts/SimpleStorage.sol > flattened/SimpleStorage.sol
-```
+Mentha Protocol is a Yield Farming protocol with additional NFT prize rewards on Ethereum. The protocol offers a chance to win NFTs every day in exchange for depositing funds besides the Mentha token rewards.
