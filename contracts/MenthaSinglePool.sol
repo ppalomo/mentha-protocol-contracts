@@ -42,7 +42,7 @@ contract MenthaSinglePool is MenthaPoolBase {
      * @notice Method used to buy a lottery ticket.
      * @param _numberOfTickets - Number of the tickets to buy.
      */
-    function buyTickets(uint _numberOfTickets) public whenParentNotPaused {
+    function buyTickets(uint _numberOfTickets) public {
         // require(status == LotteryPoolStatus.OPEN, 'The lottery pool is not open');
         uint amount = ticketPrice * _numberOfTickets;
 
@@ -62,6 +62,9 @@ contract MenthaSinglePool is MenthaPoolBase {
         bool sent = collateral.transferFrom(msg.sender, address(this), amount);
         require(sent, "Token transfer failed");
 
+        // Minting LP tokens to sender
+        _mint(msg.sender, amount);
+
         // Emiting event
         emit TicketsBought(msg.sender, _numberOfTickets, amount);
     }
@@ -73,24 +76,6 @@ contract MenthaSinglePool is MenthaPoolBase {
     function redeemTickets(uint _numberOfTickets) public nonReentrant {
         require(tickets[msg.sender] > 0 && tickets[msg.sender] >= _numberOfTickets, 'You do not have enough tickets');
 
-        _redeemTickets(_numberOfTickets, msg.sender);
-    }
-
-    /**
-     * @notice Contract balances.
-     * @return Collateral locked in the contract.
-     */
-    function getBalance() external view returns(uint) {
-        return collateral.balanceOf(address(this));
-    }
-
-    // Private methods
-
-    /**
-     * @notice Method used to redeem bought tickets once the pool is closed.
-     * @param _numberOfTickets - Number of the tickets to be cancelled.
-     */
-    function _redeemTickets(uint _numberOfTickets, address sender) internal {
         // Calculating amount to redeem
         uint amount = ticketPrice * _numberOfTickets;
         require(totalCollateral >= amount, 'Not enough money in the balance');
@@ -103,7 +88,7 @@ contract MenthaSinglePool is MenthaPoolBase {
         // Delete items from players array
         uint deleted = 0;
         for (uint i=0; i<players.length; i++) {
-            if( players[i] == sender && deleted < _numberOfTickets) {
+            if( players[i] == msg.sender && deleted < _numberOfTickets) {
                 delete players[i];
                 deleted += 1;
             }
@@ -113,8 +98,19 @@ contract MenthaSinglePool is MenthaPoolBase {
         bool sent = collateral.transfer(msg.sender, amount);
         require(sent, "Token transfer failed");
 
+        // Burning LP tokens
+        _burn(msg.sender, amount);
+
         // Emiting event
         emit TicketsRedeemed(msg.sender, _numberOfTickets, amount);
+    }
+
+    /**
+     * @notice Contract balances.
+     * @return Collateral locked in the contract.
+     */
+    function getBalance() external view returns(uint) {
+        return collateral.balanceOf(address(this));
     }
 
 }
